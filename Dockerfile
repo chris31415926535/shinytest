@@ -5,8 +5,10 @@ FROM rocker/shiny
 #RUN R -e "install.packages(c('dplyr', 'DBI', 'RSQLite','DT', 'readr', 'dbplyr'))"
 RUN R -e "install.packages(c('DT', 'dplyr', 'readr'))"
 
+RUN R -e "install.packages(c('shinymanager', 'ggplot2'))"
+RUN R -e "install.packages(c('plotly'))"
 # Copy the Shiny app code
-COPY data data
+# COPY data data
 copy app.R app.R
 #COPY . .
 
