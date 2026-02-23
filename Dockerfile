@@ -9,11 +9,11 @@ RUN R -e "install.packages(c('shinymanager', 'ggplot2'))"
 RUN R -e "install.packages(c('plotly'))"
 # Copy the Shiny app code
 # COPY data data
-copy app.R app.R
+COPY app.R app.R
 #COPY . .
 
 # Expose the application port
 EXPOSE 8080
 
 # Run the R Shiny app
-CMD Rscript app.R
+CMD ["Rscript", "app.R"]

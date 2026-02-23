@@ -1,14 +1,14 @@
 .data <- rlang::.data
 # import libraries
 library(shiny)
-library(shinymanager)
+# library(shinymanager)
 
 # hard-coded credentials
-credentials <- data.frame(
-  user = c("bdssf", "christopher"), # mandatory
-  password = c("bdssf2026", "belmonts"), # mandatory
-  admin = c(FALSE, TRUE)
-)
+# credentials <- data.frame(
+#   user = c("bdssf", "christopher"), # mandatory
+#   password = c("bdssf2026", "belmonts"), # mandatory
+#   admin = c(FALSE, TRUE)
+# )
 # possibly read in some data to be used below
 
 # define the UI
@@ -27,12 +27,12 @@ ui <- shiny::fluidPage(
   shiny::mainPanel(
     # add text, plots, etc
     #
-    shiny::plotOutput("testplot"),
-    plotly::plotlyOutput("testplotly")
+    shiny::plotOutput("testplot")
+    # plotly::plotlyOutput("testplotly")
   )
 )
 
-ui <- shinymanager::secure_app(ui)
+# ui <- shinymanager::secure_app(ui)
 
 # define server logic
 server <- function(input, output) {
@@ -40,17 +40,26 @@ server <- function(input, output) {
   # generate output text, plots, etc. that will be shown in the mainPanel
   #
   # check_credentials returns a function to authenticate users
-  res_auth <- secure_server(
-    check_credentials = check_credentials(credentials)
-  )
+  # res_auth <- secure_server(
+  #   check_credentials = check_credentials(credentials)
+  # )
 
-  print(res_auth)
+  # print(res_auth)
 
 
 
   theplot <- shiny::reactive({
     ggplot2::ggplot() +
-      ggplot2::geom_histogram(dplyr::tibble(x = runif(n = input$numPoints)), mapping = ggplot2::aes(x = .data$x), binwidth= .1)
+      ggplot2::geom_histogram(
+        dplyr::tibble(
+          x = runif(
+            n = input$numPoints
+          )
+        ),
+        mapping = ggplot2::aes(
+          x = .data$x
+        ), binwidth = .1
+      )
   })
   output$testplot <- shiny::renderPlot(theplot())
 
@@ -59,4 +68,4 @@ server <- function(input, output) {
 
 # start the app
 # shiny::shinyApp(ui, server, options = list(port = 4321))
-shiny::shinyApp(ui, server, options = list(port = 8080))
+shiny::shinyApp(ui, server, options = list(port = 8080, host = "0.0.0.0"))
