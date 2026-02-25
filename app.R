@@ -1,14 +1,14 @@
 .data <- rlang::.data
 # import libraries
 library(shiny)
-# library(shinymanager)
+library(shinymanager)
 
 # hard-coded credentials
-# credentials <- data.frame(
-#   user = c("bdssf", "christopher"), # mandatory
-#   password = c("bdssf2026", "belmonts"), # mandatory
-#   admin = c(FALSE, TRUE)
-# )
+credentials <- data.frame(
+  user = c("bdssf", "christopher"), # mandatory
+  password = c("bdssf2026", "belmonts"), # mandatory
+  admin = c(FALSE, TRUE)
+)
 # possibly read in some data to be used below
 
 # define the UI
@@ -32,7 +32,7 @@ ui <- shiny::fluidPage(
   )
 )
 
-# ui <- shinymanager::secure_app(ui)
+ui <- shinymanager::secure_app(ui)
 
 # define server logic
 server <- function(input, output) {
@@ -40,9 +40,9 @@ server <- function(input, output) {
   # generate output text, plots, etc. that will be shown in the mainPanel
   #
   # check_credentials returns a function to authenticate users
-  # res_auth <- secure_server(
-  #   check_credentials = check_credentials(credentials)
-  # )
+  res_auth <- secure_server(
+    check_credentials = check_credentials(credentials)
+  )
 
   # print(res_auth)
 
