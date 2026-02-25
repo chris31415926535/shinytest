@@ -2,8 +2,12 @@
 # import libraries
 library(shiny)
 library(shinymanager)
-
+library(ggplot2)
+library(plotly)
 # hard-coded credentials
+#
+use_login <- TRUE
+
 credentials <- data.frame(
   user = c("bdssf", "christopher"), # mandatory
   password = c("bdssf2026", "belmonts"), # mandatory
@@ -20,19 +24,21 @@ ui <- shiny::fluidPage(
   shiny::sidebarPanel(
     # add dropdowns, sliders, checkboxes, radio buttons, etc.
     #
-    shiny::sliderInput("numPoints", "numPoints", 1, 5000, 500)
+    shiny::radioButtons("distribution", "Distribution:", choices = c("Uniform", "Normal")),
+    shiny::sliderInput("numPoints", "# of Points:", 1, 5000, 500)
   ),
 
   # main panel for displaying outputs
   shiny::mainPanel(
     # add text, plots, etc
     #
-    shiny::plotOutput("testplot")
-    # plotly::plotlyOutput("testplotly")
+    plotly::plotlyOutput("testplotly")
   )
 )
 
-ui <- shinymanager::secure_app(ui)
+if (use_login) {
+  ui <- shinymanager::secure_app(ui)
+}
 
 # define server logic
 server <- function(input, output) {
@@ -40,32 +46,46 @@ server <- function(input, output) {
   # generate output text, plots, etc. that will be shown in the mainPanel
   #
   # check_credentials returns a function to authenticate users
-  res_auth <- secure_server(
-    check_credentials = check_credentials(credentials)
-  )
+  if (use_login) {
+    res_auth <- secure_server( # nolint 
+      check_credentials = check_credentials(credentials)
+    )
+  }
 
-  # print(res_auth)
-
-
+  points <- shiny::reactive({
+    if (input$distribution == "Normal") {
+      rnorm(n = input$numPoints, mean = 0.5, sd = 0.25)
+    } else if (input$distribution == "Uniform") {
+      runif(n = input$numPoints)
+    }
+  })
 
   theplot <- shiny::reactive({
-    ggplot2::ggplot() +
+    shiny::req(points())
+    p <- ggplot2::ggplot() +
       ggplot2::geom_histogram(
         dplyr::tibble(
-          x = runif(
-            n = input$numPoints
-          )
+          x = points()
         ),
         mapping = ggplot2::aes(
           x = .data$x
-        ), binwidth = .1
-      )
-  })
-  output$testplot <- shiny::renderPlot(theplot())
+        ), binwidth = .1, boundary = 0
+      ) +
+      ggplot2::theme(plot.margin = ggplot2::margin_auto()) ### MUST ADD THIS FOR GGPLOTLY!!!!!!!
 
-  # output$testplotly <- plotly::renderPlotly(plotly::ggplotly(theplot))
+    if (input$distribution == "Uniform") {
+      p <- p + ggplot2::scale_x_continuous(limits = c(0, 1))
+    } else {
+      p <- p + ggplot2::scale_x_continuous(limits = c(-0.5, 1.5))
+    }
+
+    p
+  })
+
+  output$testplot <- shiny::renderPlot(theplot())
+  output$testplotly <- plotly::renderPlotly(plotly::ggplotly(theplot()))
 }
 
 # start the app
-# shiny::shinyApp(ui, server, options = list(port = 4321))
+# shiny::shinyApp(ui, server, options = list(port = 4321, host="0.0.0.0"))
 shiny::shinyApp(ui, server, options = list(port = 8080, host = "0.0.0.0"))
